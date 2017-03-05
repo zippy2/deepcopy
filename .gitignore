@@ -1,0 +1,6 @@
+*.o
+*.swp
+structs
+structs_gen.c
+structs_gen.h
+tags

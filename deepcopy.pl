@@ -33,6 +33,7 @@ die "cannot parse command line options" unless $res;
 die "unknown mode '$mode', expecting 'header', 'source' or 'debug'"
     unless $mode =~ /^(header|source|debug)$/;
 
+my @includes = ("stdlib.h", "string.h", "structs.h", "structs_gen.h");
 my %structs;
 
 # check whether struct in %structs is defined and if so whether it already
@@ -73,6 +74,12 @@ sub generate_header {
         print "};\n\n";
         print "${structName}Ptr ${structName}Copy(const ${structName} *src);\n";
         print "void ${structName}Free(${structName}Ptr s);\n";
+    }
+}
+
+sub generate_includes {
+    foreach my $incl (@includes) {
+        print "#include \"$incl\"\n";
     }
 }
 
@@ -158,6 +165,7 @@ if ($mode eq "debug") {
     generate_header();
 } elsif ($mode eq "source") {
     print_banner();
+    generate_includes();
     generate_copy();
     generate_free();
 }
