@@ -5,6 +5,7 @@ struct test1
     float f;
     int xx;
     char *str;
+    test2 *t2;
 
 struct test2
     char a;

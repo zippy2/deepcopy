@@ -67,12 +67,20 @@ sub generate_header {
         my $struct = $structs{$structName};
         print "\ntypedef struct _$structName $structName;\n";
         print "typedef $structName *${structName}Ptr;\n";
-        print "struct _$structName {\n";
+    }
+
+    foreach my $structName (sort { $a cmp $b } keys %structs) {
+        my $struct = $structs{$structName};
+        print "\nstruct _$structName {\n";
         for my $m (@{$struct}) {
             print "    $m->{type} $m->{member};\n";
         }
-        print "};\n\n";
-        print "${structName}Ptr ${structName}Copy(const ${structName} *src);\n";
+        print "};\n";
+    }
+
+    foreach my $structName (sort { $a cmp $b } keys %structs) {
+        my $struct = $structs{$structName};
+        print "\n${structName}Ptr ${structName}Copy(const ${structName} *src);\n";
         print "void ${structName}Free(${structName}Ptr s);\n";
     }
 }
