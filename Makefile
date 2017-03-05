@@ -1,6 +1,6 @@
 STRUCTS=structs.x
 DEEPCOPY=deepcopy.pl
-CFLAGS=-O0 -ggdb -std=c99 -pedantic
+CFLAGS=-O0 -ggdb -std=c99 -pedantic -D_XOPEN_SOURCE=600
 
 all: structs
 

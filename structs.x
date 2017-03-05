@@ -4,7 +4,9 @@ struct test1
     double d;
     float f;
     int xx;
+    char *str;
 
 struct test2
     char a;
     int b;
+    test1 *t1;

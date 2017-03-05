@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "structs.h"
 #include "structs_gen.h"
@@ -24,6 +25,17 @@ void virFree(void *ptrptr)
     *(void**)ptrptr = NULL;
 }
 
+int virStrdup(char **dest,
+              const char *src)
+{
+    *dest = NULL;
+    if (!src)
+        return 0;
+    if (!(*dest = strdup(src)))
+        return -1;
+    return 1;
+}
+
 int main(int argc, char *argv[])
 {
     int ret = EXIT_FAILURE;
@@ -31,6 +43,9 @@ int main(int argc, char *argv[])
     test1 t1_src;
     test2Ptr t2_dst = NULL;
     test2 t2_src;
+
+    memset(&t1_src, 0, sizeof(t1_src));
+    memset(&t2_src, 0, sizeof(t2_src));
 
     t1_src.x = 4;
 

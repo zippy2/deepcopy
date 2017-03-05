@@ -96,13 +96,18 @@ sub generate_copy {
         print "\n";
         print "    memcpy(ret, src, sizeof(*ret));\n";
         for my $m (@{$struct}) {
-            if ($m->{type} =~ m/^(int|char|double|float)$/) {
-                next;
-            } elsif (defined $structs{$m->{type}}) {
-                print "    if (!(dst->$m->{member} = $m->{type}Copy(src->$m->{member})))\n";
-                print "        goto error;\n";
-            } else {
-                die("Unhandled type $m->{type}");
+            if ($m->{member} =~ m/^\*\w+/) {
+                my $member = substr $m->{member}, 1;
+                if ($m->{type} =~ m/char/) {
+                    print "    if (VIR_STRDUP(ret->${member}, src->${member}) < 0)\n";
+                    print "        goto error;\n";
+                } elsif (defined $structs{$m->{type}}) {
+                    print "    if (src->${member} &&\n";
+                    print "        !(ret->${member} = $m->{type}Copy(src->${member})))\n";
+                    print "        goto error;\n";
+                } else {
+                    die("Unhandled type $m->{type}");
+                }
             }
         }
         print "    return ret;\n";
@@ -122,6 +127,18 @@ sub generate_free {
         print "    if (!s)\n";
         print "        return;\n";
         print "\n";
+        for my $m (@{$struct}) {
+            if ($m->{member} =~ m/^\*\w+/) {
+                my $member = substr $m->{member}, 1;
+                if ($m->{type} =~ m/char/) {
+                    print "    VIR_FREE(s->${member});\n";
+                } elsif (defined $structs{$m->{type}}) {
+                    print "    $m->{type}Free(s->${member});\n";
+                } else {
+                    die("Unhandled type $m->{type}");
+                }
+            }
+        }
         print "    VIR_FREE(s);\n";
         print "}\n";
     }
