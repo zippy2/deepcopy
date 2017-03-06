@@ -104,14 +104,18 @@ sub generate_copy {
         print "\n";
         print "    memcpy(ret, src, sizeof(*ret));\n";
         for my $m (@{$struct}) {
-            if ($m->{member} =~ m/^\*\w+/) {
-                my $member = substr $m->{member}, 1;
-                if ($m->{type} =~ m/char/) {
+            my $isPointer = $m->{member} =~ m/^\*\w+/ || $m->{type} =~ m/^\w+Ptr$/;
+            my $member = $m->{member};
+            $member =~ s/\*//;
+            my $type = $m->{type};
+            $type =~ s/Ptr$//;
+            if ($isPointer) {
+                if ($type =~ m/char/) {
                     print "    if (VIR_STRDUP(ret->${member}, src->${member}) < 0)\n";
                     print "        goto error;\n";
-                } elsif (defined $structs{$m->{type}}) {
+                } elsif (defined $structs{$type}) {
                     print "    if (src->${member} &&\n";
-                    print "        !(ret->${member} = $m->{type}Copy(src->${member})))\n";
+                    print "        !(ret->${member} = ${type}Copy(src->${member})))\n";
                     print "        goto error;\n";
                 } else {
                     die("Unhandled type $m->{type}");
@@ -136,12 +140,16 @@ sub generate_free {
         print "        return;\n";
         print "\n";
         for my $m (@{$struct}) {
-            if ($m->{member} =~ m/^\*\w+/) {
-                my $member = substr $m->{member}, 1;
-                if ($m->{type} =~ m/char/) {
+            my $isPointer = $m->{member} =~ m/^\*\w+/ || $m->{type} =~ m/^\w+Ptr$/;
+            my $member = $m->{member};
+            $member =~ s/\*//;
+            my $type = $m->{type};
+            $type =~ s/Ptr$//;
+            if ($isPointer) {
+                if ($type =~ m/char/) {
                     print "    VIR_FREE(s->${member});\n";
-                } elsif (defined $structs{$m->{type}}) {
-                    print "    $m->{type}Free(s->${member});\n";
+                } elsif (defined $structs{$type}) {
+                    print "    ${type}Free(s->${member});\n";
                 } else {
                     die("Unhandled type $m->{type}");
                 }
